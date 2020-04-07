@@ -18,6 +18,7 @@ package org.kurento.jsonrpc.client;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 
@@ -250,8 +251,10 @@ public class JsonRpcClientNettyWebSocket extends AbstractJsonRpcClientWebSocket 
       final int maxRetries = 5;
       while (channel == null || !channel.isOpen()) {
         try {
-          channel = b.connect(host, port).sync().channel();
-          handler.handshakeFuture().sync();
+          ChannelFuture future = b.connect(host, port);
+		  if (!future.await(this.connectionTimeout, TimeUnit.MILLISECONDS)) throw new IOException("Timeout");
+          channel = future.channel();
+          handler.handshakeFuture().await(this.connectionTimeout, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
           // This should never happen
           log.warn("{} ERROR connecting WS Netty client, opening channel", label, e);
@@ -298,7 +301,7 @@ public class JsonRpcClientNettyWebSocket extends AbstractJsonRpcClientWebSocket 
     if (channel != null) {
       log.debug("{} Closing client", label);
       try {
-        channel.close().sync();
+        channel.close().await(this.connectionTimeout, TimeUnit.MILLISECONDS);
       } catch (Exception e) {
         log.debug("{} Could not properly close websocket client. Reason: {}", label, e.getMessage(),
             e);

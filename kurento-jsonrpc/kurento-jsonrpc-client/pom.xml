@@ -10,6 +10,7 @@
 		<version>6.13.1</version>
 	</parent>
 	<artifactId>kurento-jsonrpc-client</artifactId>
+	<version>6.13.1-PSG</version>
 	<packaging>jar</packaging>
 
 	<!-- Project-level information -->
@@ -32,6 +33,7 @@
 		<dependency>
 			<groupId>org.kurento</groupId>
 			<artifactId>kurento-commons</artifactId>
+			<version>6.13.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
