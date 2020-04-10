@@ -304,7 +304,7 @@ public class JsonRpcClientNettyWebSocket extends AbstractJsonRpcClientWebSocket 
     if (channel != null) {
       log.debug("{} Closing client", label);
       try {
-    	ChannelFuture future = channel.close()l
+    	ChannelFuture future = channel.close();
         if (!future.await(this.connectionTimeout, TimeUnit.MILLISECONDS)) future.cancel(true);
       } catch (Exception e) {
         log.debug("{} Could not properly close websocket client. Reason: {}", label, e.getMessage(),
