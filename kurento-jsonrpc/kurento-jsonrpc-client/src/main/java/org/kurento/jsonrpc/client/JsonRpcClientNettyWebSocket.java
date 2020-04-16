@@ -252,9 +252,10 @@ public class JsonRpcClientNettyWebSocket extends AbstractJsonRpcClientWebSocket 
       while (channel == null || !channel.isOpen()) {
         try {
           ChannelFuture future = b.connect(host, port);
-		  if (!future.await(this.connectionTimeout, TimeUnit.MILLISECONDS)) {
+		  if (!future.await(this.connectionTimeout * 2, TimeUnit.MILLISECONDS)) {
+			  log.warn("Connect timed out: timeout {}ms", this.connectionTimeout);
 			  future.cancel(true);
-			  throw new IOException("Timeout");
+			  throw new TimeoutException("Connect timeout");
 		  }
           channel = future.channel();
           handler.handshakeFuture().await(this.connectionTimeout, TimeUnit.MILLISECONDS);
@@ -305,7 +306,10 @@ public class JsonRpcClientNettyWebSocket extends AbstractJsonRpcClientWebSocket 
       log.debug("{} Closing client", label);
       try {
     	ChannelFuture future = channel.close();
-        if (!future.await(this.connectionTimeout, TimeUnit.MILLISECONDS)) future.cancel(true);
+        if (!channel.close().await(this.connectionTimeout * 2, TimeUnit.MILLISECONDS)) {
+        	log.warn("Close timedout: timeout {}ms", this.connectionTimeout);
+        	future.cancel(true);
+        }
       } catch (Exception e) {
         log.debug("{} Could not properly close websocket client. Reason: {}", label, e.getMessage(),
             e);
